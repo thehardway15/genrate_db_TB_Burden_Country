@@ -25,8 +25,8 @@ labels_mapper = {
     'ISO 3-character country/territory code': 'country_iso3_code',
     'ISO numeric country/territory code': 'country_iso_numeric',
     'Region': 'region',
-    'Year': 'year',
-    'Estimated total population number': 'population',
+    'Year': 'record_year',
+    'Estimated total population number': 'country_population',
     'Estimated prevalence of TB (all forms) per 100 000 population': 'prevalence',
     'Estimated prevalence of TB (all forms) per 100 000 population, low bound': 'prevalence_lb',
     'Estimated prevalence of TB (all forms) per 100 000 population, high bound': 'prevalence_ub',
@@ -84,7 +84,7 @@ for row in data:
 
 # country table
 countries_table = []
-country_row = namedtuple('country_row', 'country_name country_iso_code country_iso3_code country_iso_numeric pk')
+country_row = namedtuple('country_row', 'country_name country_iso_code country_iso3_code country_iso_numeric id')
 country_pk = 1
 for row in data_with_correct_label:
     if len(list(filter(lambda x: x['country_name'] == row['country_name'], countries_table))) > 0:
@@ -94,7 +94,7 @@ for row in data_with_correct_label:
         country_iso_code=row['country_iso_code'],
         country_iso3_code=row['country_iso3_code'],
         country_iso_numeric=row['country_iso_numeric'],
-        pk=country_pk
+        id=country_pk
     )
     country_pk += 1
     countries_table.append(country._asdict())
@@ -102,8 +102,8 @@ for row in data_with_correct_label:
 # relation country to data
 for row in data_with_correct_label:
     country_pk = filter(lambda x: x['country_name'] == row['country_name'], countries_table)
-    country_pk = next(country_pk)['pk']
-    row['country_pk'] = country_pk
+    country_pk = next(country_pk)['id']
+    row['country_id'] = country_pk
     # remove unwanted columns
     del row['country_name']
     del row['country_iso_code']
@@ -112,14 +112,14 @@ for row in data_with_correct_label:
 
 # region table
 regions_table = []
-region_row = namedtuple('region_row', 'region pk')
+region_row = namedtuple('region_row', 'region id')
 region_pk = 1
 for row in data_with_correct_label:
     if len(list(filter(lambda x: x['region'] == row['region'], regions_table))) > 0:
         continue
     region = region_row(
         region=row['region'],
-        pk=region_pk
+        id=region_pk
     )
     region_pk += 1
     regions_table.append(region._asdict())
@@ -127,20 +127,20 @@ for row in data_with_correct_label:
 # relation region to data
 for row in data_with_correct_label:
     region_pk = filter(lambda x: x['region'] == row['region'], regions_table)
-    region_pk = next(region_pk)['pk']
-    row['region_pk'] = region_pk
+    region_pk = next(region_pk)['id']
+    row['region_id'] = region_pk
     # remove unwanted columns
     del row['region']
 
 # estimate method table
 estimate_method_table = []
-estimate_method_row = namedtuple('estimate_method_row', 'estimate_method pk')
+estimate_method_row = namedtuple('estimate_method_row', 'estimate_method id')
 estimate_method_pk = 1
 for row in data_with_correct_label:
     if len(list(filter(lambda x: x['estimate_method'] == row['prevalence_estimation_method'], estimate_method_table))) == 0:
         estimate_method = estimate_method_row(
             estimate_method=row['prevalence_estimation_method'],
-            pk=estimate_method_pk
+            id=estimate_method_pk
         )
         estimate_method_pk += 1
         estimate_method_table.append(estimate_method._asdict())
@@ -148,7 +148,7 @@ for row in data_with_correct_label:
     if len(list(filter(lambda x: x['estimate_method'] == row['mortality_estimation_method'], estimate_method_table))) == 0:
         estimate_method = estimate_method_row(
             estimate_method=row['mortality_estimation_method'],
-            pk=estimate_method_pk
+            id=estimate_method_pk
         )
         estimate_method_pk += 1
         estimate_method_table.append(estimate_method._asdict())
@@ -156,7 +156,7 @@ for row in data_with_correct_label:
     if len(list(filter(lambda x: x['estimate_method'] == row['incidence_estimation_method'], estimate_method_table))) == 0:
         estimate_method = estimate_method_row(
             estimate_method=row['incidence_estimation_method'],
-            pk=estimate_method_pk
+            id=estimate_method_pk
         )
         estimate_method_pk += 1
         estimate_method_table.append(estimate_method._asdict())
@@ -164,7 +164,7 @@ for row in data_with_correct_label:
     if len(list(filter(lambda x: x['estimate_method'] == row['TBHIV_estimation_method'], estimate_method_table))) == 0:
         estimate_method = estimate_method_row(
             estimate_method=row['TBHIV_estimation_method'],
-            pk=estimate_method_pk
+            id=estimate_method_pk
         )
         estimate_method_pk += 1
         estimate_method_table.append(estimate_method._asdict())
@@ -172,17 +172,17 @@ for row in data_with_correct_label:
 # relation estimate method to data
 for row in data_with_correct_label:
     estimate_method_pk = filter(lambda x: x['estimate_method'] == row['prevalence_estimation_method'], estimate_method_table)
-    estimate_method_pk = next(estimate_method_pk)['pk']
-    row['prevalence_estimation_method_pk'] = estimate_method_pk
+    estimate_method_pk = next(estimate_method_pk)['id']
+    row['prevalence_estimation_method_id'] = estimate_method_pk
     estimate_method_pk = filter(lambda x: x['estimate_method'] == row['mortality_estimation_method'], estimate_method_table)
-    estimate_method_pk = next(estimate_method_pk)['pk']
-    row['mortality_estimation_method_pk'] = estimate_method_pk
+    estimate_method_pk = next(estimate_method_pk)['id']
+    row['mortality_estimation_method_id'] = estimate_method_pk
     estimate_method_pk = filter(lambda x: x['estimate_method'] == row['incidence_estimation_method'], estimate_method_table)
-    estimate_method_pk = next(estimate_method_pk)['pk']
-    row['incidence_estimation_method_pk'] = estimate_method_pk
+    estimate_method_pk = next(estimate_method_pk)['id']
+    row['incidence_estimation_method_id'] = estimate_method_pk
     estimate_method_pk = filter(lambda x: x['estimate_method'] == row['TBHIV_estimation_method'], estimate_method_table)
-    estimate_method_pk = next(estimate_method_pk)['pk']
-    row['TBHIV_estimation_method_pk'] = estimate_method_pk
+    estimate_method_pk = next(estimate_method_pk)['id']
+    row['TBHIV_estimation_method_id'] = estimate_method_pk
 
     # remove unwanted columns
     del row['prevalence_estimation_method']
@@ -199,8 +199,12 @@ print('data_with_correct_label', len(data_with_correct_label))
 # number in string to int
 for row in data_with_correct_label:
     for key, value in row.items():
-        if isinstance(value, str) and value.isnumeric():
+        if isinstance(row[key], str) and value.isnumeric():
             row[key] = int(value)
+        if isinstance(row[key], str) and value.replace('.', '', 1).isdigit():
+            row[key] = float(value)
+        if value == '':
+            row[key] = None
 
 for row in countries_table:
     for key, value in row.items():
@@ -272,7 +276,7 @@ def generate_insert_statements(data, table_name, batch_size=1000):
     values = []
 
     for row in data:
-        formatted_values = ', '.join("'{}'".format(val.replace("'", "''")) if isinstance(val, str) else str(val) for val in row.values())
+        formatted_values = ', '.join("'{}'".format(val.replace("'", "''")) if isinstance(val, str) else str(val) if val is not None else 'NULL' for val in row.values())
         values.append(formatted_values)
 
         if len(values) == batch_size:
@@ -290,63 +294,63 @@ def generate_insert_statements(data, table_name, batch_size=1000):
 
 #### Country
 sql = 'CREATE TABLE country (\n'
-sql += '  pk INTEGER PRIMARY KEY, \n'
+sql += '  id int IDENTITY(1,1) PRIMARY KEY, \n'
 sql += '  country_name VARCHAR(255), \n'
 sql += '  country_iso_code VARCHAR(2), \n'
 sql += '  country_iso3_code VARCHAR(3), \n'
-sql += '  country_iso_numeric INTEGER \n'
+sql += '  country_iso_numeric int \n'
 sql += ');'
 creste_country_sql = sql
 
 #### Region
 sql = 'CREATE TABLE region (\n'
-sql += '  pk INTEGER PRIMARY KEY, \n'
+sql += '  id int IDENTITY(1,1) PRIMARY KEY, \n'
 sql += '  region VARCHAR(255) \n'
 sql += ');'
 creste_region_sql = sql
 
 #### Estimate method
 sql = 'CREATE TABLE estimate_method (\n'
-sql += '  pk INTEGER PRIMARY KEY, \n'
+sql += '  id int IDENTITY(1,1) PRIMARY KEY, \n'
 sql += '  estimate_method VARCHAR(255) \n'
 sql += ');'
 creste_estimate_method_sql = sql
 
 #### Record
 sql = 'CREATE TABLE record (\n'
-sql += '  pk INTEGER PRIMARY KEY, \n'
-sql += '  country_pk FOREIGN KEY (country_pk) REFERENCES country(pk), \n'
-sql += '  region_pk FOREIGN KEY (region_pk) REFERENCES region(pk), \n'
-sql += '  prevalence_estimation_method_pk FOREIGN KEY (prevalence_estimation_method_pk) REFERENCES estimate_method(pk), \n'
-sql += '  mortality_estimation_method_pk FOREIGN KEY (mortality_estimation_method_pk) REFERENCES estimate_method(pk), \n'
-sql += '  incidence_estimation_method_pk FOREIGN KEY (incidence_estimation_method_pk) REFERENCES estimate_method(pk), \n'
-sql += '  TBHIV_estimation_method_pk FOREIGN KEY (TBHIV_estimation_method_pk) REFERENCES estimate_method(pk), \n'
-sql += '  year INTEGER, \n'
-sql += '  population INTEGER, \n'
-sql += '  prevalence INTEGER, \n'
-sql += '  prevalence_lb INTEGER, \n'
-sql += '  prevalence_ub INTEGER, \n'
-sql += '  prevalence_all_forms INTEGER, \n'
-sql += '  prevalence_all_forms_lb INTEGER, \n'
-sql += '  prevalence_all_forms_ub INTEGER, \n'
-sql += '  mortality_excluding_HIV INTEGER, \n'
-sql += '  mortality_excluding_HIV_lb INTEGER, \n'
-sql += '  mortality_excluding_HIV_ub INTEGER, \n'
-sql += '  deaths_excluding_HIV INTEGER, \n'
-sql += '  deaths_excluding_HIV_lb INTEGER, \n'
-sql += '  deaths_excluding_HIV_ub INTEGER, \n'
+sql += '  id int IDENTITY(1,1) PRIMARY KEY, \n'
+sql += '  country_id int FOREIGN KEY (country_id) REFERENCES country(id), \n'
+sql += '  region_id int FOREIGN KEY (region_id) REFERENCES region(id), \n'
+sql += '  prevalence_estimation_method_id int FOREIGN KEY (prevalence_estimation_method_id) REFERENCES estimate_method(id), \n'
+sql += '  mortality_estimation_method_id int FOREIGN KEY (mortality_estimation_method_id) REFERENCES estimate_method(id), \n'
+sql += '  incidence_estimation_method_id int FOREIGN KEY (incidence_estimation_method_id) REFERENCES estimate_method(id), \n'
+sql += '  TBHIV_estimation_method_id int FOREIGN KEY (TBHIV_estimation_method_id) REFERENCES estimate_method(id), \n'
+sql += '  record_year int, \n'
+sql += '  country_population int, \n'
+sql += '  prevalence int, \n'
+sql += '  prevalence_lb int, \n'
+sql += '  prevalence_ub int, \n'
+sql += '  prevalence_all_forms int, \n'
+sql += '  prevalence_all_forms_lb int, \n'
+sql += '  prevalence_all_forms_ub int, \n'
+sql += '  mortality_excluding_HIV int, \n'
+sql += '  mortality_excluding_HIV_lb int, \n'
+sql += '  mortality_excluding_HIV_ub int, \n'
+sql += '  deaths_excluding_HIV int, \n'
+sql += '  deaths_excluding_HIV_lb int, \n'
+sql += '  deaths_excluding_HIV_ub int, \n'
 sql += '  mortality_HIV_positive FLOAT, \n'
 sql += '  mortality_HIV_positive_lb FLOAT, \n'
 sql += '  mortality_HIV_positive_ub FLOAT, \n'
 sql += '  deaths_HIV_positive FLOAT, \n'
 sql += '  deaths_HIV_positive_lb FLOAT, \n'
 sql += '  deaths_HIV_positive_ub FLOAT, \n'
-sql += '  incidence INTEGER, \n'
-sql += '  incidence_lb INTEGER, \n'
-sql += '  incidence_ub INTEGER, \n'
-sql += '  incident_cases INTEGER, \n'
-sql += '  incident_cases_lb INTEGER, \n'
-sql += '  incident_cases_ub INTEGER, \n'
+sql += '  incidence int, \n'
+sql += '  incidence_lb int, \n'
+sql += '  incidence_ub int, \n'
+sql += '  incident_cases int, \n'
+sql += '  incident_cases_lb int, \n'
+sql += '  incident_cases_ub int, \n'
 sql += '  HIV_in_incident_TB_percent FLOAT, \n'
 sql += '  HIV_in_incident_TB_percent_lb FLOAT, \n'
 sql += '  HIV_in_incident_TB_percent_ub FLOAT, \n'
@@ -356,9 +360,9 @@ sql += '  incidence_HIV_positive_ub FLOAT, \n'
 sql += '  incidence_HIV_positive_all_forms FLOAT, \n'
 sql += '  incidence_HIV_positive_all_forms_lb FLOAT, \n'
 sql += '  incidence_HIV_positive_all_forms_ub FLOAT, \n'
-sql += '  case_detection_rate_percent INTEGER, \n'
-sql += '  case_detection_rate_percent_lb INTEGER, \n'
-sql += '  case_detection_rate_percent_ub INTEGER \n'
+sql += '  case_detection_rate_percent float, \n'
+sql += '  case_detection_rate_percent_lb float, \n'
+sql += '  case_detection_rate_percent_ub float \n'
 sql += ');'
 creste_record_sql = sql
 
@@ -383,6 +387,15 @@ insert_record_sql = insert_statements
 # Save to single SQL file
 
 with open('schema.sql', 'w') as f:
+    # DROP IF EXISTS
+
+    f.write('DROP TABLE IF EXISTS record;\n')
+    f.write('DROP TABLE IF EXISTS country;\n')
+    f.write('DROP TABLE IF EXISTS region;\n')
+    f.write('DROP TABLE IF EXISTS estimate_method;\n')
+    f.write('\n')
+    f.write('\n')
+
     f.write(creste_country_sql)
     f.write('\n')
     f.write('\n')
