@@ -272,7 +272,7 @@ def generate_insert_statements(data, table_name, batch_size=1000):
     values = []
 
     for row in data:
-        formatted_values = ', '.join("'{}'".format(val) if isinstance(val, str) else str(val) for val in row.values())
+        formatted_values = ', '.join("'{}'".format(val.replace("'", "''")) if isinstance(val, str) else str(val) for val in row.values())
         values.append(formatted_values)
 
         if len(values) == batch_size:
@@ -285,9 +285,7 @@ def generate_insert_statements(data, table_name, batch_size=1000):
         values_str = ', '.join(['({})'.format(val) for val in values])
         insert_statements.append(insert_template.format(table_name, columns, values_str))
 
-    # Combine all insert statements into a single string
-    sql_insert_string = ''.join(insert_statements)
-    return sql_insert_string
+    return insert_statements
 
 
 #### Country
@@ -298,21 +296,21 @@ sql += '  country_iso_code VARCHAR(2), \n'
 sql += '  country_iso3_code VARCHAR(3), \n'
 sql += '  country_iso_numeric INTEGER \n'
 sql += ');'
-print(sql)
+creste_country_sql = sql
 
 #### Region
 sql = 'CREATE TABLE region (\n'
 sql += '  pk INTEGER PRIMARY KEY, \n'
 sql += '  region VARCHAR(255) \n'
 sql += ');'
-print(sql)
+creste_region_sql = sql
 
 #### Estimate method
 sql = 'CREATE TABLE estimate_method (\n'
 sql += '  pk INTEGER PRIMARY KEY, \n'
 sql += '  estimate_method VARCHAR(255) \n'
 sql += ');'
-print(sql)
+creste_estimate_method_sql = sql
 
 #### Record
 sql = 'CREATE TABLE record (\n'
@@ -362,22 +360,58 @@ sql += '  case_detection_rate_percent INTEGER, \n'
 sql += '  case_detection_rate_percent_lb INTEGER, \n'
 sql += '  case_detection_rate_percent_ub INTEGER \n'
 sql += ');'
-print(sql)
+creste_record_sql = sql
 
 ### Insert data in bach 1000 row
 
 # country
 insert_statements = generate_insert_statements(countries_table, 'country', batch_size=1000)
-print(insert_statements)
+insert_country_sql = insert_statements
 
 # region
 insert_statements = generate_insert_statements(regions_table, 'region', batch_size=1000)
-print(insert_statements)
+insert_region_sql = insert_statements
 
 # estimate_method
 insert_statements = generate_insert_statements(estimate_method_table, 'estimate_method', batch_size=1000)
-print(insert_statements)
+insert_estimate_method_sql = insert_statements
 
 # record
 insert_statements = generate_insert_statements(data_with_correct_label, 'record', batch_size=1000)
-print(insert_statements)
+insert_record_sql = insert_statements
+
+# Save to single SQL file
+
+with open('schema.sql', 'w') as f:
+    f.write(creste_country_sql)
+    f.write('\n')
+    f.write('\n')
+    f.write(creste_region_sql)
+    f.write('\n')
+    f.write('\n')
+    f.write(creste_estimate_method_sql)
+    f.write('\n')
+    f.write('\n')
+    f.write(creste_record_sql)
+    f.write('\n')
+    f.write('\n')
+
+    for insert_statement in insert_country_sql:
+        f.write(insert_statement)
+        f.write('\n')
+        f.write('\n')
+
+    for insert_statement in insert_region_sql:
+        f.write(insert_statement)
+        f.write('\n')
+        f.write('\n')
+
+    for insert_statement in insert_estimate_method_sql:
+        f.write(insert_statement)
+        f.write('\n')
+        f.write('\n')
+
+    for insert_statement in insert_record_sql:
+        f.write(insert_statement)
+        f.write('\n')
+        f.write('\n')
